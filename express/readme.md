@@ -1,4 +1,4 @@
-# express学习
+# express入门
 ## 安装
 首先假定已经安装了node.js, 接下来创建一个目录,进入此目录,并将该目录最为当前工作目录.
 ```
@@ -158,3 +158,9 @@ app.delete('/user',function(req,res){
 
     app.use('/static',express.static('public'));
 现在,就可以通过带有/static的url来访问public目录下面的内容了.
+
+***
+# Express专题
+## 路由
+路由是指如何定义应用的端点(URLs)以及如何响应客户端的请求.
+路由是由一个URL、HHTP请求（get、post等）和若干个句柄组成，它的结构如下：
