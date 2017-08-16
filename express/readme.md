@@ -145,3 +145,16 @@ app.delete('/user',function(req,res){
     res.send('这是一个delete请求在/user');
 });
 ```
+***
+## 利用Express托管静态文件
+通过Express内置的express.static中间件就可以提供静态资源文件的访问.例如,假设public目录放置了图片,css和javascript文件,你就可以如下设置:
+
+    app.use(express.static('public'));
+现在,public目录下面的文件就可以被访问了.所有文件的路径都是相对于存放目录的,所以存放静态文件的目录名不需要出现在url中
+如果你的静态资源存放在多个目录下面,可以通过多次调用express.static中间件来加载. 访问时,express.static中间件会根据目录添加顺序查找所需文件.
+
+### 虚拟目录
+如果希望通过express.static访问的文件都存放在一个虚拟目录下面(比如static),可以通过如下命令实现:
+
+    app.use('/static',express.static('public'));
+现在,就可以通过带有/static的url来访问public目录下面的内容了.
