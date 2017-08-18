@@ -3,7 +3,11 @@ var router = express.Router();
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
-    res.render('index', { title: 'QingCong Index' });
+    var user = {
+        username: 'admin',
+        password: '123456'
+    };
+    res.render('home', { title: 'Home', user: user });
 });
 
 module.exports = router;
