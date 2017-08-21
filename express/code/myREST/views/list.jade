@@ -1,0 +1,17 @@
+doctype html
+html
+  head
+    title= juser
+    link(rel='stylesheet', href='/stylesheets/style.css')
+  body
+    block content
+    p1=title
+    - var t =juser
+    each u,k in t
+      p #{k}
+      ul
+      li 姓名: #{u.name}
+      li 密码: #{u.password}
+      li 专业: #{u.profession}
+      li id:  #{u.id}
+      hr
