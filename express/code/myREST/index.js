@@ -8,7 +8,6 @@ var jade = require('jade');
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
 app.get('/listUsers', function(req, res) {
     fs.readFile(__dirname + "/" + "users.json", 'utf8', function(err, data) {
         var id = url.parse(req.url, true).query.id;
@@ -56,8 +55,10 @@ app.get('/addUser', function(req, res) {
             }
         });
         console.log(data);
-        res.end(JSON.stringify(data));
-
+        res.render('list', {
+            title: '用户信息',
+            juser: data
+        });
     });
 });
 
@@ -75,7 +76,10 @@ app.get('/deleteUser', function(req, res) {
                 res.end('add success');
             }
         });
-        res.end(JSON.stringify(data));
+        res.render('list', {
+            title: '用户信息',
+            juser: data
+        });
     });
 });
 /*
@@ -89,6 +93,7 @@ app.get('/:id', function(req, res) {
     });
 });
 */
+app.use(express.static(path.join(__dirname, 'public')));
 var server = app.listen(3000, function() {
     var host = server.address().address;
     var port = server.address().port;
