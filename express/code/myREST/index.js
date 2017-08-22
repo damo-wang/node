@@ -4,95 +4,99 @@ var url = require('url');
 var fs = require('fs');
 var path = require('path');
 var jade = require('jade');
+var mysql = require('mysql');
+//链接数据库
+var connection = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'will1314',
+    port: '3306',
+    database: 'myrest',
+    //table: user_list
+    //desc: u_id, u_name,u_pwd,u_procession
+});
+
+//数据库结果转JSON
+function result2json(result, str, res) {
+    var j_data = {};
+    for (var i = 0; i < result.length; i++) {
+        j_data['user' + i] = {
+            'id': result[i].u_id,
+            'name': result[i].u_name,
+            'password': result[i].u_pwd,
+            'profession': result[i].u_profession
+        }
+    }
+    res.render("list", { title: str, juser: j_data });
+}
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.get('/listUsers', function(req, res) {
-    fs.readFile(__dirname + "/" + "users.json", 'utf8', function(err, data) {
-        var id = url.parse(req.url, true).query.id;
-        console.log('id:' + id);
-        if (id != undefined) {
-            data = JSON.parse(data);
-            var user = data["user" + id];
-            console.log(user);
-            res.render('list', {
-                title: '用户信息',
-                juser: user
-            });
-        } else {
-            console.log(data);
-            data = JSON.parse(data);
-            res.render('list', {
-                title: '用户信息',
-                juser: data
-            });
+    var id = url.parse(req.url, true).query.id;
+    //查询数据
+    var sql = 'SELECT * FROM user_list';
+    if (id != undefined) {
+        sql += ' where u_id=' + id;
+    }
+    connection.query(sql, function(err, result) {
+        if (err) {
+            console.log('[SELECT ERROR] - ', err.message);
         }
+        result2json(result, '查询成功', res);
     });
 });
 
 //添加的新用户数据
 var user = {
-    "user4": {
-        "name": "mohit",
-        "password": "password4",
-        "profession": "teacher",
-        "id": 4
+    "user7": {
+        "name": "damjlowills",
+        "password": "passuiword6",
+        "profession": "firehkman",
+        "id": 7
     }
 };
 
 app.get('/addUser', function(req, res) {
-    // 读取已存在的数据
-    fs.readFile(__dirname + "/" + "users.json", 'utf8', function(err, data) {
-        data = JSON.parse(data);
-        data["user4"] = user["user4"];
-
-        fs.writeFile(__dirname + "/" + "users.json", JSON.stringify(data), function(err) {
+    var sql = 'insert into user_list (u_id,u_name,u_pwd,u_profession) values (?,?,?,?)';
+    var sqlParams = [user["user7"].id, user["user7"].name, user["user7"].password, user["user7"].profession];
+    connection.query(sql, sqlParams, function(err, result) {
+        //插入执行后只接显示所有信息,err信息返回
+        var str = (err ? err.code : '插入成功');
+        sql = "select * from user_list";
+        connection.query(sql, function(err, result) {
             if (err) {
-                res.end('add failed');
-            } else {
-                res.end('add success');
+                console.log('[SELECT ERROR] - ', err.message);
+                return;
             }
+            result2json(result, str, res);
         });
-        console.log(data);
-        res.render('list', {
-            title: '用户信息',
-            juser: data
-        });
-    });
+    })
 });
 
 app.get('/deleteUser', function(req, res) {
 
     // First read existing users.
     var id = url.parse(req.url, true).query.id;
-    fs.readFile(__dirname + "/" + "users.json", 'utf8', function(err, data) {
-        data = JSON.parse(data);
-        delete data["user" + id];
-        fs.writeFile(__dirname + "/" + "users.json", JSON.stringify(data), function(err) {
-            if (err) {
-                res.end('add failed');
-            } else {
-                res.end('add success');
-            }
-        });
-        res.render('list', {
-            title: '用户信息',
-            juser: data
-        });
-    });
+    var sql = 'DELETE FROM user_list where u_id=' + id;
+    connection.query(sql, function(err, result) {
+        if (err) {
+            console.log(err);
+            return;
+        } else {
+            console.log('delete success');
+            sql = "select * from user_list";
+            connection.query(sql, function(err, result) {
+                if (err) {
+                    console.log('[SELECT ERROR] - ', err.message);
+                    return;
+                }
+                result2json(result, '删除成功', res);
+            });
+        }
+    })
 });
-/*
-app.get('/:id', function(req, res) {
-    // 首先我们读取已存在的用户
-    fs.readFile(__dirname + "/" + "users.json", 'utf8', function(err, data) {
-        data = JSON.parse(data);
-        var user = data["user" + req.params.id]
-        console.log(user);
-        res.end(JSON.stringify(user));
-    });
-});
-*/
 app.use(express.static(path.join(__dirname, 'public')));
 var server = app.listen(3000, function() {
     var host = server.address().address;
